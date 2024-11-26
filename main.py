@@ -29,10 +29,9 @@ z = 0 #Global Variable to store the number of successful readings
 date  = 'N/A'
 
 @app.get("/", response_class=HTMLResponse) #Home
-async def name():
+async def name(request: Request):
     global x, y, z, date
-    LastReading = f"x: {x}, y: {y}, z: {z}, date: {date}"
-    return templates.TemplateResponse("home.html", context={"result":LastReading, "x":x, "y":y, "z":z, "date":date})
+    return templates.TemplateResponse("home.html", {"request": request, "x": x, "y": y, "z": z, "date": date})
     
 
 # Post request for upload bandwidth from local host to API
