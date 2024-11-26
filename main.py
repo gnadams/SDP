@@ -30,9 +30,8 @@ date  = 'N/A'
 
 @app.get("/", response_class=HTMLResponse) #Home
 async def name():
-    # last JSON object
-    LastReading = f"x: {x}, y: {y}, z: {z}, date: {date}"
     global x, y, z, date
+    LastReading = f"x: {x}, y: {y}, z: {z}, date: {date}"
     return templates.TemplateResponse("home.html", context={"result":LastReading, "x":x, "y":y, "z":z, "date":date})
     
 
