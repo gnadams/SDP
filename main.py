@@ -7,6 +7,10 @@ from sql_app import crud, models, schemas
 from sql_app.database import SessionLocal, engine
 from typing import List
 from mongoDB.mongoConnection import DOCUMENTS, COLLECTION, add_impact_record, printDocuments
+from pymongo.mongo_client import MongoClient
+from pymongo.server_api import ServerApi
+from bson import ObjectId, Decimal128
+
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
@@ -54,9 +58,16 @@ def read_latest_value():
 
 @app.get("/returnAll/", response_model=List[schemas.impactData])
 def read_all_data():
-    printDocuments()
+
+
+    uri = "mongodb+srv://gna5:mLlcsUw7PwPefhHH@cluster08.d5vve.mongodb.net/?retryWrites=true&w=majority&appName=Cluster08"
+    client = MongoClient(uri, server_api=ServerApi('1'))
+    database = client["ConcussionData"]
+    collection = database["impacts"]
+    documents = collection.find()
+
     results = []
-    for doc in DOCUMENTS:
+    for doc in documents:
         processed_doc = {
             "id": str(doc["_id"]),  # Convert ObjectId to string
             "date": doc["date"],
@@ -65,5 +76,6 @@ def read_all_data():
             "ConcussionDetected": doc["ConcussionDetected"]
         }
         results.append(processed_doc)
+        print(processed_doc)
     return results
 
