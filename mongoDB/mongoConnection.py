@@ -4,6 +4,10 @@ from bson import ObjectId, Decimal128
 
 
 uri = "mongodb+srv://gna5:mLlcsUw7PwPefhHH@cluster08.d5vve.mongodb.net/?retryWrites=true&w=majority&appName=Cluster08"
+CLIENT = MongoClient(uri, server_api=ServerApi('1'))
+DATABASE = CLIENT["ConcussionData"]
+COLLECTION = DATABASE["impacts"]
+DOCUMENTS = COLLECTION.find()
 
 def add_impact_record(collection, date, gyroscope_data, accelerometer_data, concussion_detected):
     """
@@ -29,8 +33,9 @@ def add_impact_record(collection, date, gyroscope_data, accelerometer_data, conc
     except:
         print("error adding document")
 
-def printDocuments(documents):
-    for doc in documents:
+# prints out all documents for 'Impact'
+def printDocuments():
+    for doc in DOCUMENTS:
         print(doc)
 
 def verifyConnection(client):
@@ -42,10 +47,13 @@ def verifyConnection(client):
 
 def main():
     client = MongoClient(uri, server_api=ServerApi('1'))
+    verifyConnection(client)
     database = client["ConcussionData"]
     collection = database["impacts"]
     documents = collection.find()
-    add_impact_record(documents,"3/4/2025", [50.0, 30.5, 45.2], [424.5124, 43.0, 54.52], False)
+    # returns all documents
+    printDocuments(documents)
+    add_impact_record(collection, "3/11/2025", [50.0, 30.5, 45.2], [424.5124, 43.0, 54.52], False)
 
 
 

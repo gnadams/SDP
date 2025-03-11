@@ -21,3 +21,22 @@ class gyroscope(BaseModel):
     x: float
     y: float
     z: float
+
+class gyroscopeData(BaseModel):
+    x: float
+    y: float
+    z: float
+
+class accelerometerData(BaseModel):
+    x: float
+    y: float
+    z: float
+
+class impactData(BaseModel):
+    date: str
+    gyroscope1: gyroscopeData
+    #gyroscope2: gyroscopeDataW
+    accelerometer1: accelerometerData
+    #accelerometer2: accelerometerData
+
+    

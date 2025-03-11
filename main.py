@@ -5,7 +5,8 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 from sql_app import crud, models, schemas
 from sql_app.database import SessionLocal, engine
-
+from typing import List
+from mongoDB.mongoConnection import DOCUMENTS, COLLECTION, add_impact_record, printDocuments
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
@@ -51,4 +52,18 @@ def read_latest_value():
     val = schemas.gyroscope(x=x, y=y, z=z, date=date)
     return val
 
+@app.get("/returnAll/", response_model=List[schemas.impactData])
+def read_all_data():
+    printDocuments()
+    results = []
+    for doc in DOCUMENTS:
+        processed_doc = {
+            "id": str(doc["_id"]),  # Convert ObjectId to string
+            "date": doc["date"],
+            "gyroscopeData": [float(item["$numberLong"]) for item in doc["gyroscopeData"]],
+            "AccelerometerData": [float(item["$numberDecimal"]) for item in doc["AccelerometerData"]],
+            "ConcussionDetected": doc["ConcussionDetected"]
+        }
+        results.append(processed_doc)
+    return results
 
