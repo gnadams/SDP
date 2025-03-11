@@ -22,6 +22,8 @@ class gyroscope(BaseModel):
     y: float
     z: float
 
+
+
 class gyroscopeData(BaseModel):
     x: float
     y: float
@@ -37,6 +39,7 @@ class impactData(BaseModel):
     gyroscope1: gyroscopeData
     #gyroscope2: gyroscopeDataW
     accelerometer1: accelerometerData
+    ConcussionDetected: bool
     #accelerometer2: accelerometerData
 
     

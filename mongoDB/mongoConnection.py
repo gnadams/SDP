@@ -52,7 +52,7 @@ def main():
     collection = database["impacts"]
     documents = collection.find()
     # returns all documents
-    printDocuments(documents)
+    printDocuments()
     add_impact_record(collection, "3/11/2025", [50.0, 30.5, 45.2], [424.5124, 43.0, 54.52], False)
 
 

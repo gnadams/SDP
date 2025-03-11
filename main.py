@@ -41,7 +41,7 @@ async def name(request: Request):
 
 # Post request for upload bandwidth from local host to API
 @app.post("/upload/", response_model=schemas.gyroscope)
-def upload_gyroscope_data(data: schemas.gyroscope):
+def upload_gyroscope_data_doesnt_upload_to_db(data: schemas.gyroscope):
     global x, y, z, date
     x = data.x
     y = data.y
@@ -52,12 +52,43 @@ def upload_gyroscope_data(data: schemas.gyroscope):
 
 # returns the most recent Bandwidth object
 @app.get("/recent/", response_model=schemas.gyroscope)
-def read_latest_value():
+def read_last_local_value():
     val = schemas.gyroscope(x=x, y=y, z=z, date=date)
     return val
 
+@app.post("/addImpact/", response_model=schemas.impactData)
+async def add_impact_data_to_DB(data: schemas.impactData):
+    # Create the document as per your schema
+    document = {
+        "_id": ObjectId(),
+        "date": data.date,
+        "gyroscopeData": {
+            "x": data.gyroscope1.x,
+            "y": data.gyroscope1.y,
+            "z": data.gyroscope1.z
+        },
+        "AccelerometerData": {
+            "x": data.accelerometer1.x,
+            "y": data.accelerometer1.y,
+            "z": data.accelerometer1.z
+        },
+        "ConcussionDetected": data.ConcussionDetected
+    }
+
+    try:
+        COLLECTION.insert_one(document)
+        # Return the data in the format matching the response model
+        return {
+            "date": data.date,
+            "gyroscope1": data.gyroscope1,
+            "accelerometer1": data.accelerometer1,
+            "ConcussionDetected": data.ConcussionDetected
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error adding document: {e}")
+
 @app.get("/returnAll/", response_model=List[schemas.impactData])
-def read_all_data():
+def read_all_data_from_DB():
     uri = "mongodb+srv://gna5:mLlcsUw7PwPefhHH@cluster08.d5vve.mongodb.net/?retryWrites=true&w=majority&appName=Cluster08"
     client = MongoClient(uri, server_api=ServerApi('1'))
     database = client["ConcussionData"]
@@ -66,14 +97,25 @@ def read_all_data():
 
     results = []
     for doc in documents:
-        processed_doc = {
-            "id": str(doc["_id"]),  # Convert ObjectId to string
-            "date": doc["date"],
-            "gyroscopeData": doc["gyroscopeData"],  # No conversion needed
-            "AccelerometerData": doc["AccelerometerData"],  # No conversion needed
-            "ConcussionDetected": doc["ConcussionDetected"]
-        }
-        results.append(processed_doc)
-        print(processed_doc)
-    return results
+        print(doc)
+        try:
+            processed_doc = {
+                "date": doc["date"],
+                "gyroscope1": {
+                    "x": float(doc["gyroscopeData"][0]),
+                    "y": float(doc["gyroscopeData"][1]),
+                    "z": float(doc["gyroscopeData"][2])
+                },
+                "accelerometer1": {
+                    "x": float(doc["AccelerometerData"][0]),
+                    "y": float(doc["AccelerometerData"][1]),
+                    "z": float(doc["AccelerometerData"][2])
+                },
+                "ConcussionDetected": doc["ConcussionDetected"]
+            }
+            results.append(processed_doc)
 
+        except Exception as e:
+            print(f"Error processing document: {e}")
+
+    return results
