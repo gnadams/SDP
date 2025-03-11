@@ -58,8 +58,6 @@ def read_latest_value():
 
 @app.get("/returnAll/", response_model=List[schemas.impactData])
 def read_all_data():
-
-
     uri = "mongodb+srv://gna5:mLlcsUw7PwPefhHH@cluster08.d5vve.mongodb.net/?retryWrites=true&w=majority&appName=Cluster08"
     client = MongoClient(uri, server_api=ServerApi('1'))
     database = client["ConcussionData"]
@@ -71,8 +69,8 @@ def read_all_data():
         processed_doc = {
             "id": str(doc["_id"]),  # Convert ObjectId to string
             "date": doc["date"],
-            "gyroscopeData": [float(item["$numberLong"]) for item in doc["gyroscopeData"]],
-            "AccelerometerData": [float(item["$numberDecimal"]) for item in doc["AccelerometerData"]],
+            "gyroscopeData": doc["gyroscopeData"],  # No conversion needed
+            "AccelerometerData": doc["AccelerometerData"],  # No conversion needed
             "ConcussionDetected": doc["ConcussionDetected"]
         }
         results.append(processed_doc)
