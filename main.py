@@ -10,6 +10,7 @@ from mongoDB.mongoConnection import DOCUMENTS, COLLECTION, add_impact_record, pr
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 from bson import ObjectId, Decimal128
+from datetime import datetime
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -36,7 +37,7 @@ date  = 'N/A'
 @app.get("/", response_class=HTMLResponse) #Home
 async def name(request: Request):
     global x, y, z, date
-    return templates.TemplateResponse("home.html", {"request": request, "x": x, "y": y, "z": z, "date": date})
+    return templates.TemplateResponse("home.html", {"request": request, "x": x, "y": y, "z": z, "date": date, "docs": DOCUMENTS})
     
 
 # Post request for upload bandwidth from local host to API
@@ -59,18 +60,40 @@ def read_last_local_value():
 @app.post("/addImpact/", response_model=schemas.impactData)
 async def add_impact_data_to_DB(data: schemas.impactData):
     # Create the document as per your schema
+    date = datetime.now()
+    string_date = date.strftime("%Y-%m-%d %H:%M:%S")
     document = {
         "_id": ObjectId(),
-        "date": data.date,
-        "gyroscopeData": {
+        "date": string_date,
+        "gyroscopeData1": {
             "x": data.gyroscope1.x,
             "y": data.gyroscope1.y,
             "z": data.gyroscope1.z
         },
-        "AccelerometerData": {
+        "gyroscopeData2": {
+            "x": data.gyroscope2.x,
+            "y": data.gyroscope2.y,
+            "z": data.gyroscope2.z
+        },
+        "gyroscopeData3": {
+            "x": data.gyroscope3.x,
+            "y": data.gyroscope3.y,
+            "z": data.gyroscope3.z
+        },
+        "AccelerometerData1": {
             "x": data.accelerometer1.x,
             "y": data.accelerometer1.y,
             "z": data.accelerometer1.z
+        },
+        "AccelerometerData2": {
+            "x": data.accelerometer2.x,
+            "y": data.accelerometer2.y,
+            "z": data.accelerometer2.z
+        },
+        "AccelerometerData3": {
+            "x": data.accelerometer3.x,
+            "y": data.accelerometer3.y,
+            "z": data.accelerometer3.z
         },
         "ConcussionDetected": data.ConcussionDetected
     }
@@ -79,9 +102,13 @@ async def add_impact_data_to_DB(data: schemas.impactData):
         COLLECTION.insert_one(document)
         # Return the data in the format matching the response model
         return {
-            "date": data.date,
+            "date": string_date,
             "gyroscope1": data.gyroscope1,
+            "gyroscope2": data.gyroscope2,
+            "gyroscope3": data.gyroscope3,
             "accelerometer1": data.accelerometer1,
+            "accelerometer2": data.accelerometer2,
+            "accelerometer3": data.accelerometer3,
             "ConcussionDetected": data.ConcussionDetected
         }
     except Exception as e:
@@ -102,14 +129,34 @@ def read_all_data_from_DB():
             processed_doc = {
                 "date": doc["date"],
                 "gyroscope1": {
-                    "x": float(doc["gyroscopeData"][0]),
-                    "y": float(doc["gyroscopeData"][1]),
-                    "z": float(doc["gyroscopeData"][2])
+                    "x": float(doc["gyroscopeData1"][0]),
+                    "y": float(doc["gyroscopeData1"][1]),
+                    "z": float(doc["gyroscopeData1"][2])
+                },
+                "gyroscope2": {
+                    "x": float(doc["gyroscopeData2"][0]),
+                    "y": float(doc["gyroscopeData2"][1]),
+                    "z": float(doc["gyroscopeData2"][2])
+                },
+                "gyroscope3": {
+                    "x": float(doc["gyroscopeData3"][0]),
+                    "y": float(doc["gyroscopeData3"][1]),
+                    "z": float(doc["gyroscopeData3"][2])
                 },
                 "accelerometer1": {
-                    "x": float(doc["AccelerometerData"][0]),
-                    "y": float(doc["AccelerometerData"][1]),
-                    "z": float(doc["AccelerometerData"][2])
+                    "x": float(doc["AccelerometerData1"][0]),
+                    "y": float(doc["AccelerometerData1"][1]),
+                    "z": float(doc["AccelerometerData1"][2])
+                },
+                "accelerometer2": {
+                    "x": float(doc["AccelerometerData2"][0]),
+                    "y": float(doc["AccelerometerData2"][1]),
+                    "z": float(doc["AccelerometerData2"][2])
+                },
+                "accelerometer3": {
+                    "x": float(doc["AccelerometerData3"][0]),
+                    "y": float(doc["AccelerometerData3"][1]),
+                    "z": float(doc["AccelerometerData3"][2])
                 },
                 "ConcussionDetected": doc["ConcussionDetected"]
             }

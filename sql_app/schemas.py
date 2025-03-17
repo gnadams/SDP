@@ -37,9 +37,11 @@ class accelerometerData(BaseModel):
 class impactData(BaseModel):
     date: str
     gyroscope1: gyroscopeData
-    #gyroscope2: gyroscopeDataW
+    gyroscope2: gyroscopeData
+    gyroscope3: gyroscopeData
     accelerometer1: accelerometerData
+    accelerometer2: accelerometerData
+    accelerometer3: accelerometerData
     ConcussionDetected: bool
-    #accelerometer2: accelerometerData
 
     
