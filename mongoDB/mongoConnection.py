@@ -33,6 +33,59 @@ def add_impact_record(collection, date, gyroscope_data, accelerometer_data, conc
     except:
         print("error adding document")
 
+def retrieveImpactData():
+        uri = "mongodb+srv://gna5:mLlcsUw7PwPefhHH@cluster08.d5vve.mongodb.net/?retryWrites=true&w=majority&appName=Cluster08"
+        client = MongoClient(uri, server_api=ServerApi('1'))
+        database = client["ConcussionData"]
+        collection = database["impacts"]
+        documents = collection.find()
+        print("Documents: ", documents)
+        results = []
+        for doc in documents:
+            print(doc)
+            try:
+                processed_doc = {
+            "date": str(doc["date"]),
+            "gyroscope1": {
+                "x": float(doc["gyroscopeData1"]["x"]),
+                "y": float(doc["gyroscopeData1"]["y"]),
+                "z": float(doc["gyroscopeData1"]["z"])
+            },
+            "gyroscope2": {
+                "x": float(doc["gyroscopeData2"]["x"]),
+                "y": float(doc["gyroscopeData2"]["y"]),
+                "z": float(doc["gyroscopeData2"]["z"])
+            },
+            "gyroscope3": {
+                "x": float(doc["gyroscopeData3"]["x"]),
+                "y": float(doc["gyroscopeData3"]["y"]),
+                "z": float(doc["gyroscopeData3"]["z"])
+            },
+            "accelerometer1": {
+                "x": float(doc["AccelerometerData1"]["x"]),
+                "y": float(doc["AccelerometerData1"]["y"]),
+                "z": float(doc["AccelerometerData1"]["z"])
+            },
+            "accelerometer2": {
+                "x": float(doc["AccelerometerData2"]["x"]),
+                "y": float(doc["AccelerometerData2"]["y"]),
+                "z": float(doc["AccelerometerData2"]["z"])
+            },
+            "accelerometer3": {
+                "x": float(doc["AccelerometerData3"]["x"]),
+                "y": float(doc["AccelerometerData3"]["y"]),
+                "z": float(doc["AccelerometerData3"]["z"])
+            },
+            "ConcussionDetected": doc["ConcussionDetected"]
+                }
+                results.append(processed_doc)
+
+            except Exception as e:
+                print(f"Error processing document: {e}")
+                print(f"The document with the error: {doc}")
+                print("\0")
+        return results
+
 # prints out all documents for 'Impact'
 def printDocuments():
     for doc in DOCUMENTS:
@@ -51,9 +104,11 @@ def main():
     database = client["ConcussionData"]
     collection = database["impacts"]
     documents = collection.find()
-    # returns all documents
-    printDocuments()
-    add_impact_record(collection, "3/11/2025", [50.0, 30.5, 45.2], [424.5124, 43.0, 54.52], False)
+    results = retrieveImpactData()
+    print(results)
+        # returns all documents
+    #printDocuments()
+    #add_impact_record(collection, "3/11/2025", [50.0, 30.5, 45.2], [424.5124, 43.0, 54.52], False)
 
 
 

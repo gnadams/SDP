@@ -3,27 +3,19 @@ from sqlalchemy.orm import Session
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
-from sql_app import crud, models, schemas
-from sql_app.database import SessionLocal, engine
+from sql_app import schemas
 from typing import List
-from mongoDB.mongoConnection import DOCUMENTS, COLLECTION, add_impact_record, printDocuments
+from mongoDB.mongoConnection import DOCUMENTS, COLLECTION, add_impact_record, printDocuments, retrieveImpactData
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 from bson import ObjectId, Decimal128
 from datetime import datetime
 
-models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
 
-# Dependency
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+
 
 templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -37,7 +29,9 @@ date  = 'N/A'
 @app.get("/", response_class=HTMLResponse) #Home
 async def name(request: Request):
     global x, y, z, date
-    return templates.TemplateResponse("home.html", {"request": request, "x": x, "y": y, "z": z, "date": date, "docs": DOCUMENTS})
+    impacts = retrieveImpactData()
+    print(impacts)
+    return templates.TemplateResponse("home.html", {"request": request, "x": x, "y": y, "z": z, "date": date, "impacts": impacts})
     
 
 # Post request for upload bandwidth from local host to API
@@ -62,6 +56,7 @@ async def add_impact_data_to_DB(data: schemas.impactData):
     # Create the document as per your schema
     date = datetime.now()
     string_date = date.strftime("%Y-%m-%d %H:%M:%S")
+    data.ConcussionDetected = False
     document = {
         "_id": ObjectId(),
         "date": string_date,
@@ -122,47 +117,6 @@ def read_all_data_from_DB():
     collection = database["impacts"]
     documents = collection.find()
 
-    results = []
-    for doc in documents:
-        print(doc)
-        try:
-            processed_doc = {
-                "date": doc["date"],
-                "gyroscope1": {
-                    "x": float(doc["gyroscopeData1"][0]),
-                    "y": float(doc["gyroscopeData1"][1]),
-                    "z": float(doc["gyroscopeData1"][2])
-                },
-                "gyroscope2": {
-                    "x": float(doc["gyroscopeData2"][0]),
-                    "y": float(doc["gyroscopeData2"][1]),
-                    "z": float(doc["gyroscopeData2"][2])
-                },
-                "gyroscope3": {
-                    "x": float(doc["gyroscopeData3"][0]),
-                    "y": float(doc["gyroscopeData3"][1]),
-                    "z": float(doc["gyroscopeData3"][2])
-                },
-                "accelerometer1": {
-                    "x": float(doc["AccelerometerData1"][0]),
-                    "y": float(doc["AccelerometerData1"][1]),
-                    "z": float(doc["AccelerometerData1"][2])
-                },
-                "accelerometer2": {
-                    "x": float(doc["AccelerometerData2"][0]),
-                    "y": float(doc["AccelerometerData2"][1]),
-                    "z": float(doc["AccelerometerData2"][2])
-                },
-                "accelerometer3": {
-                    "x": float(doc["AccelerometerData3"][0]),
-                    "y": float(doc["AccelerometerData3"][1]),
-                    "z": float(doc["AccelerometerData3"][2])
-                },
-                "ConcussionDetected": doc["ConcussionDetected"]
-            }
-            results.append(processed_doc)
-
-        except Exception as e:
-            print(f"Error processing document: {e}")
-
+    results = retrieveImpactData()
     return results
+    

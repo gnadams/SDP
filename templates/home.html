@@ -10,6 +10,7 @@
 <script
 src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js">
 </script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
 <html>
     <title>DT 08 Concussion Data</title>
@@ -20,18 +21,44 @@ src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js">
             <h1>DT 08 Concussion Data</h1>
         
             </div>
-        <p style="margin-left:60px">
-          Gyroscope Data:
-        </p>
-        <div class="parent">
-                <div class="div1"> 
-                    last updated: {{date}}
+        
+       
+            <div class="container mt-4">
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered text-center">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Time</th>
+                                <th>Concussion Detected</th>
+                                <th>Gyro 1 (x, y, z)</th>
+                                <th>Gyro 2 (x, y, z)</th>
+                                <th>Gyro 3 (x, y, z)</th>
+                                <th>Accel 1 (x, y, z)</th>
+                                <th>Accel 2 (x, y, z)</th>
+                                <th>Accel 3 (x, y, z)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for impact in impacts %}
+                            <tr>
+                                <td>{{ impact.date }}</td>
+                                <td>
+                                    <span class="badge {% if impact.ConcussionDetected %}bg-danger{% else %}bg-success{% endif %}">
+                                        {{ "Yes" if impact.ConcussionDetected else "No" }}
+                                    </span>
+                                </td>
+                                <td>{{ impact.gyroscope1.x }}, {{ impact.gyroscope1.y }}, {{ impact.gyroscope1.z }}</td>
+                                <td>{{ impact.gyroscope2.x }}, {{ impact.gyroscope2.y }}, {{ impact.gyroscope2.z }}</td>
+                                <td>{{ impact.gyroscope3.x }}, {{ impact.gyroscope3.y }}, {{ impact.gyroscope3.z }}</td>
+                                <td>{{ impact.accelerometer1.x }}, {{ impact.accelerometer1.y }}, {{ impact.accelerometer1.z }}</td>
+                                <td>{{ impact.accelerometer2.x }}, {{ impact.accelerometer2.y }}, {{ impact.accelerometer2.z }}</td>
+                                <td>{{ impact.accelerometer3.x }}, {{ impact.accelerometer3.y }}, {{ impact.accelerometer3.z }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
-                <div class="div2">
-                    X: {{x}}, Y: {{y}}, Z: {{z}}
-                </div>
-                
-        </div>
+            </div>
         
 
        
