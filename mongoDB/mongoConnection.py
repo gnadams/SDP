@@ -78,6 +78,7 @@ def retrieveImpactData():
                 "z": float(doc["AccelerometerData3"]["z"])
             },
             "force": float(doc["force"]),
+            "helmetID": int(doc["helmetID"]),
             "ConcussionDetected": doc["ConcussionDetected"]
                 }
                 results.append(processed_doc)
@@ -90,6 +91,13 @@ def retrieveImpactData():
 
 
 def calculateAverages(impacts):
+    try:
+        if impacts[0]["date"] == None:
+            print("impacts[0] is null")
+            return None
+    except:
+        print("impacts[0] is null")
+        return None
     data = {
         "latestImpact": impacts[0]["date"],
         "AverageForce": 0.0,

@@ -30,16 +30,21 @@ date  = 'N/A'
 async def name(request: Request):
     global x, y, z, date
     impacts = retrieveImpactData()
-    print("impacts type ", type(impacts))
-    print(impacts)
+    
     return templates.TemplateResponse("home.html", {"request": request, "x": x, "y": y, "z": z, "date": date, "impacts": impacts})
     
 @app.get("/", response_class=HTMLResponse) #Home
 async def about(request: Request):
     impacts = retrieveImpactData()
     data = calculateAverages(impacts)
-    print()
-    print("data object", data)
+    if data is None:
+        data = {
+        "latestImpact": "No data available",
+        "AverageForce": 0.0,
+        "totalConcussions": 0,
+        "totalImpacts": 0,
+        "timestamps" : [],
+    }
     return templates.TemplateResponse("dashboard.html", {"request": request, "impactData": data})
 
 
@@ -100,6 +105,7 @@ async def add_impact_data_to_DB(data: schemas.impactData):
             "z": data.accelerometer3.z
         },
         "force": data.force,
+        "helmetID": data.helmetID,
         "ConcussionDetected": data.ConcussionDetected
     }
 
@@ -115,6 +121,7 @@ async def add_impact_data_to_DB(data: schemas.impactData):
             "accelerometer2": data.accelerometer2,
             "accelerometer3": data.accelerometer3,
             "force": data.force,
+            "helmetID": data.helmetID,
             "ConcussionDetected": data.ConcussionDetected
         }
     except Exception as e:
