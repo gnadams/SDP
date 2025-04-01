@@ -42,6 +42,7 @@ class impactData(BaseModel):
     accelerometer1: accelerometerData
     accelerometer2: accelerometerData
     accelerometer3: accelerometerData
+    force: float
     ConcussionDetected: bool
 
     

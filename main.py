@@ -5,7 +5,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 from sql_app import schemas
 from typing import List
-from mongoDB.mongoConnection import DOCUMENTS, COLLECTION, add_impact_record, printDocuments, retrieveImpactData
+from mongoDB.mongoConnection import DOCUMENTS, COLLECTION, add_impact_record, printDocuments, retrieveImpactData,calculateAverages
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 from bson import ObjectId, Decimal128
@@ -26,13 +26,22 @@ y = 0 #Global Variable to store the number of errors
 z = 0 #Global Variable to store the number of successful readings
 date  = 'N/A'
 
-@app.get("/", response_class=HTMLResponse) #Home
+@app.get("/data/", response_class=HTMLResponse) #data list
 async def name(request: Request):
     global x, y, z, date
     impacts = retrieveImpactData()
+    print("impacts type ", type(impacts))
     print(impacts)
     return templates.TemplateResponse("home.html", {"request": request, "x": x, "y": y, "z": z, "date": date, "impacts": impacts})
     
+@app.get("/", response_class=HTMLResponse) #Home
+async def about(request: Request):
+    impacts = retrieveImpactData()
+    data = calculateAverages(impacts)
+    print()
+    print("data object", data)
+    return templates.TemplateResponse("dashboard.html", {"request": request, "impactData": data})
+
 
 # Post request for upload bandwidth from local host to API
 @app.post("/upload/", response_model=schemas.gyroscope)
@@ -90,6 +99,7 @@ async def add_impact_data_to_DB(data: schemas.impactData):
             "y": data.accelerometer3.y,
             "z": data.accelerometer3.z
         },
+        "force": data.force,
         "ConcussionDetected": data.ConcussionDetected
     }
 
@@ -104,6 +114,7 @@ async def add_impact_data_to_DB(data: schemas.impactData):
             "accelerometer1": data.accelerometer1,
             "accelerometer2": data.accelerometer2,
             "accelerometer3": data.accelerometer3,
+            "force": data.force,
             "ConcussionDetected": data.ConcussionDetected
         }
     except Exception as e:
