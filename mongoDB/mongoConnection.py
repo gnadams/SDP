@@ -1,9 +1,11 @@
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 from bson import ObjectId, Decimal128
+from dotenv import load_dotenv
+import os
 
-
-uri = "mongodb+srv://gna5:mLlcsUw7PwPefhHH@cluster08.d5vve.mongodb.net/?retryWrites=true&w=majority&appName=Cluster08"
+load_dotenv()
+uri = os.getenv("mongoURI")
 CLIENT = MongoClient(uri, server_api=ServerApi('1'))
 DATABASE = CLIENT["ConcussionData"]
 COLLECTION = DATABASE["impacts"]
@@ -57,11 +59,7 @@ def retrieveImpactData():
                 "y": float(doc["gyroscopeData2"]["y"]),
                 "z": float(doc["gyroscopeData2"]["z"])
             },
-            "gyroscope3": {
-                "x": float(doc["gyroscopeData3"]["x"]),
-                "y": float(doc["gyroscopeData3"]["y"]),
-                "z": float(doc["gyroscopeData3"]["z"])
-            },
+            
             "accelerometer1": {
                 "x": float(doc["AccelerometerData1"]["x"]),
                 "y": float(doc["AccelerometerData1"]["y"]),
@@ -72,11 +70,7 @@ def retrieveImpactData():
                 "y": float(doc["AccelerometerData2"]["y"]),
                 "z": float(doc["AccelerometerData2"]["z"])
             },
-            "accelerometer3": {
-                "x": float(doc["AccelerometerData3"]["x"]),
-                "y": float(doc["AccelerometerData3"]["y"]),
-                "z": float(doc["AccelerometerData3"]["z"])
-            },
+            
             "force": float(doc["force"]),
             "helmetID": int(doc["helmetID"]),
             "ConcussionDetected": doc["ConcussionDetected"]

@@ -1,4 +1,4 @@
-from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
 from sqlalchemy.orm import Session
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
@@ -10,13 +10,12 @@ from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 from bson import ObjectId, Decimal128
 from datetime import datetime
+from dotenv import load_dotenv
+import os
+load_dotenv()
 
 
 app = FastAPI()
-
-
-
-
 templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
@@ -25,6 +24,17 @@ x = 0 #Global Variable to store the number of readings
 y = 0 #Global Variable to store the number of errors
 z = 0 #Global Variable to store the number of successful readings
 date  = 'N/A'
+
+connected_clients = []
+@app.websocket("/ws/notifications")
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
+    connected_clients.append(websocket)
+    try:
+        while True:
+            await websocket.receive_text()  # Just to keep the connection alive
+    except WebSocketDisconnect:
+        connected_clients.remove(websocket)
 
 @app.get("/data/", response_class=HTMLResponse) #data list
 async def name(request: Request):
@@ -70,7 +80,10 @@ async def add_impact_data_to_DB(data: schemas.impactData):
     # Create the document as per your schema
     date = datetime.now()
     string_date = date.strftime("%Y-%m-%d %H:%M:%S")
-    data.ConcussionDetected = False
+    if data.force > 80:  # adjust this threshold as needed
+        data.ConcussionDetected = True
+    else:
+        data.ConcussionDetected = False
     document = {
         "_id": ObjectId(),
         "date": string_date,
@@ -84,11 +97,6 @@ async def add_impact_data_to_DB(data: schemas.impactData):
             "y": data.gyroscope2.y,
             "z": data.gyroscope2.z
         },
-        "gyroscopeData3": {
-            "x": data.gyroscope3.x,
-            "y": data.gyroscope3.y,
-            "z": data.gyroscope3.z
-        },
         "AccelerometerData1": {
             "x": data.accelerometer1.x,
             "y": data.accelerometer1.y,
@@ -99,11 +107,6 @@ async def add_impact_data_to_DB(data: schemas.impactData):
             "y": data.accelerometer2.y,
             "z": data.accelerometer2.z
         },
-        "AccelerometerData3": {
-            "x": data.accelerometer3.x,
-            "y": data.accelerometer3.y,
-            "z": data.accelerometer3.z
-        },
         "force": data.force,
         "helmetID": data.helmetID,
         "ConcussionDetected": data.ConcussionDetected
@@ -111,15 +114,16 @@ async def add_impact_data_to_DB(data: schemas.impactData):
 
     try:
         COLLECTION.insert_one(document)
+        if data.ConcussionDetected:
+            for ws in connected_clients:
+                await ws.send_text(f"🚨 Concussion Detected for Helmet ID: {data.helmetID}")
         # Return the data in the format matching the response model
         return {
             "date": string_date,
             "gyroscope1": data.gyroscope1,
             "gyroscope2": data.gyroscope2,
-            "gyroscope3": data.gyroscope3,
             "accelerometer1": data.accelerometer1,
             "accelerometer2": data.accelerometer2,
-            "accelerometer3": data.accelerometer3,
             "force": data.force,
             "helmetID": data.helmetID,
             "ConcussionDetected": data.ConcussionDetected
@@ -129,7 +133,7 @@ async def add_impact_data_to_DB(data: schemas.impactData):
 
 @app.get("/returnAll/", response_model=List[schemas.impactData])
 def read_all_data_from_DB():
-    uri = "mongodb+srv://gna5:mLlcsUw7PwPefhHH@cluster08.d5vve.mongodb.net/?retryWrites=true&w=majority&appName=Cluster08"
+    uri = os.getenv("mongoURI")
     client = MongoClient(uri, server_api=ServerApi('1'))
     database = client["ConcussionData"]
     collection = database["impacts"]

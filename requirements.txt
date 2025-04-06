@@ -1,5 +1,5 @@
 fastapi
-pydantic==1.10.15
+pydantic==1.10.15s
 uvicorn
 jinja2
 sqlalchemy
@@ -8,3 +8,5 @@ speedtest-cli
 pytz
 pyMongo
 pymongo[srv]
+python-dotenv
+uvicorn[standard]

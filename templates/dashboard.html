@@ -41,6 +41,25 @@
             padding: 20px;
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    
+    <script>
+        const socket = new WebSocket("ws://" + window.location.host + "/ws/notifications");
+    
+        socket.onmessage = function(event) {
+            Toastify({
+                text: event.data,
+                duration: 5000,
+                gravity: "top",
+                position: "right",
+                backgroundColor: "#ff5e57",
+            }).showToast();
+        };
+    
+        socket.onclose = () => console.log("Socket closed");
+        socket.onerror = (e) => console.error("Socket error", e);
+    </script>
 </head>
 <body>
 
