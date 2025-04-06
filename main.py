@@ -80,10 +80,7 @@ async def add_impact_data_to_DB(data: schemas.impactData):
     # Create the document as per your schema
     date = datetime.now()
     string_date = date.strftime("%Y-%m-%d %H:%M:%S")
-    if data.force > 80:  # adjust this threshold as needed
-        data.ConcussionDetected = True
-    else:
-        data.ConcussionDetected = False
+    
     document = {
         "_id": ObjectId(),
         "date": string_date,
