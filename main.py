@@ -80,7 +80,7 @@ async def add_impact_data_to_DB(data: schemas.impactData):
     # Create the document as per your schema
     date = datetime.now()
     string_date = date.strftime("%Y-%m-%d %H:%M:%S")
-    
+    print("ConcussionDetected Variable: ", data.ConcussionDetected)
     document = {
         "_id": ObjectId(),
         "date": string_date,
