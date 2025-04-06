@@ -6,6 +6,7 @@ import os
 
 load_dotenv()
 uri = os.getenv("mongoURI")
+URI = os.getenv("mongoURI")
 CLIENT = MongoClient(uri, server_api=ServerApi('1'))
 DATABASE = CLIENT["ConcussionData"]
 COLLECTION = DATABASE["impacts"]
@@ -37,11 +38,10 @@ def add_impact_record(collection, date, gyroscope_data, accelerometer_data, conc
         print("error adding document")
 
 def retrieveImpactData():
-        uri = "mongodb+srv://gna5:mLlcsUw7PwPefhHH@cluster08.d5vve.mongodb.net/?retryWrites=true&w=majority&appName=Cluster08"
-        client = MongoClient(uri, server_api=ServerApi('1'))
+        client = MongoClient(URI, server_api=ServerApi('1'))
         database = client["ConcussionData"]
         collection = database["impacts"]
-        documents = collection.find()
+        documents = collection.find().sort("date", -1)
         #print("Documents: ", documents)
         results = []
         for doc in documents:
