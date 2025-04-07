@@ -12,7 +12,25 @@ src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js">
 
 <html>
     <head>
-    
+        <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+        
+        <script>
+            const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+            const socket = new WebSocket(`${protocol}//${window.location.host}/ws/notifications`);
+            socket.onmessage = function(event) {
+                Toastify({
+                    text: event.data,
+                    duration: 5000,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "#ff5e57",
+                }).showToast();
+            };
+        
+            socket.onclose = () => console.log("Socket closed");
+            socket.onerror = (e) => console.error("Socket error", e);
+        </script>
         <link rel="stylesheet" href="../styles/styles.css">
         <title>DT 08 Concussion Data</title>
         <style>
