@@ -1,5 +1,6 @@
 fastapi
 pydantic
+uvicorn[standard]
 uvicorn
 jinja2
 sqlalchemy
@@ -9,4 +10,4 @@ pytz
 pyMongo
 pymongo[srv]
 python-dotenv
-uvicorn[standard]
+websockets
