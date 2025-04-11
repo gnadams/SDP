@@ -81,6 +81,35 @@ async def add_impact_data_to_DB(data: schemas.impactData):
     date = datetime.now()
     string_date = date.strftime("%Y-%m-%d %H:%M:%S")
     print("ConcussionDetected Variable: ", data.ConcussionDetected)
+    # delete below if broken
+    aThreshold = 3000
+    if data.accelerometer1.x > aThreshold or data.accelerometer1.y > aThreshold or data.accelerometer1.z > aThreshold or data.accelerometer2.x > aThreshold or data.accelerometer2.y > aThreshold or data.accelerometer2.z > aThreshold:
+        return {
+            "date": string_date,
+            "gyroscope1": data.gyroscope1,
+            "gyroscope2": data.gyroscope2,
+            "accelerometer1": data.accelerometer1,
+            "accelerometer2": data.accelerometer2,
+            "force": data.force,
+            "helmetID": data.helmetID,
+            "ConcussionDetected": data.ConcussionDetected
+        }
+    if (abs(data.gyroscope1.z - data.gyroscope2.z) > 3000):
+        return {
+            "date": string_date,
+            "gyroscope1": data.gyroscope1,
+            "gyroscope2": data.gyroscope2,
+            "accelerometer1": data.accelerometer1,
+            "accelerometer2": data.accelerometer2,
+            "force": data.force,
+            "helmetID": data.helmetID,
+            "ConcussionDetected": data.ConcussionDetected
+        }
+    # correct if gyroscope is broken
+    if (data.gyroscope2.x == 0 and data.gyroscope2.y == 0):
+        data.gyroscope2.x = 0.991 * data.gyroscope1.x
+        data.gyroscope2.y = 1.014 * data.gyroscope1.y
+    # end of corrections
     document = {
         "_id": ObjectId(),
         "date": string_date,
